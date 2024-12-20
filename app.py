@@ -1,5 +1,6 @@
 import os  
-from flask import Blueprint, render_template, request, redirect, Flask
+from flask import Blueprint, render_template, request, redirect, Flask, session
+from werkzeug.security import check_password_hash, generate_password_hash 
 import psycopg2
 from dotenv import load_dotenv  
 
@@ -31,7 +32,96 @@ def dbClose(cursor, connection):
     connection.close()
 
 @rgr.route('/', methods=['GET'])
-def main():
+def login():
+    username = session.get('username', 'Anon')
+    userID = session.get('id')
+    subscriptions = []    
+    conn = dbConnect()
+    cur = conn.cursor()
+    cur.execute("""select subscription_id, name, cost, frequency, start_date from subscriptions""")
+    subscriptions = cur.fetchall()
+    dbClose(cur, conn)
+    return render_template ('login.html', username=username, subscriptions=subscriptions)
+
+@rgr.route('/registration', methods=['GET', 'POST'])
+def registerPage():
+    
+    errors = []   
+    if request.method == 'GET':
+        return render_template('registration.html', errors=errors)
+
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if not (username or password):  
+        errors.append('Заполните все поля')
+        print(errors)
+        return render_template('registration.html', errors=errors)
+    
+    hashPassword = generate_password_hash(password)
+
+    conn = dbConnect()
+    cur = conn.cursor()
+    
+    #проверка
+    cur.execute("SELECT username FROM users WHERE username = %s;", (username,))
+    
+    if cur.fetchone() is not None:
+        errors.append('Пользователь с данным именем уже существует')
+       
+        conn.close()
+        cur.close()
+
+        return render_template('rgr/registration.html', errors=errors)
+
+    #вставка нового пользователя
+    cur.execute("INSERT INTO users (username, password) VALUES (%s, %s);", (username, hashPassword))
+    conn.commit()  
+    conn.close()
+    cur.close()
+
+    return redirect ('/login')
+
+
+@rgr.route('/login/api/', methods = ['GET', 'POST'])
+def loginPage():
+    errors = [];
+    
+    if request.method == 'GET':
+        return render_template('rgr/login.html', errors=errors)
+    
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    if not (username or password):
+        errors.append('Заполните все поля')
+        return render_template('rgr/login.html', errors=errors)
+    
+    conn = dbConnect()
+    cur = conn.cursor()
+
+    cur.execute("SELECT id, password FROM users WHERE username = %s;", (username,))
+
+    result = cur.fetchone()
+
+    if result is None:
+        errors.append('Неправильный логин')
+        dbClose(cur, conn)
+        return render_template('rgr/login.html', errors = errors)
+    
+    userID, hashPassword = result
+
+    if check_password_hash(hashPassword, password) or hashPassword == password:
+        session['id'] = userID
+        session['username'] = username
+        dbClose(cur, conn)
+        return redirect ('/main/')
+    else: 
+        errors.append('Неправильный логин или пароль')
+        return render_template('rgr/login.html', errors=errors)
+
+@rgr.route('/subscriptions', methods=['GET'])
+def subscriptions():
     conn = dbConnect()
     cur = conn.cursor()
     cur.execute("""select subscription_id, name, cost, frequency, start_date from subscriptions""")
