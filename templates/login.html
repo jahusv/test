@@ -33,19 +33,28 @@
             border: none;
             cursor: pointer;
         }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <h1>Вход</h1>
-    <form action="/" method="POST">
-        <label for="login">login</label>
+    <form action="/login" method="POST">
+        <label for="login">Логин</label>
         <input type="text" id="login" name="login" required>
 
-        <label for="password">пароль</label>
-        <input type="text" id="password" name="password" required>
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" required>
 
-        <button type="submit">Сохранить</button>
-        <button type="submit">Зарегистрироваться</button>
+        <button type="submit">Войти</button>
+        <button id="register-btn" type="button">Зарегистрироваться</button>
     </form>
+
+    <script>
+        document.getElementById('register-btn').addEventListener('click', function () {
+            window.location.href = '/registration';
+        });
+    </script>
 </body>
 </html>

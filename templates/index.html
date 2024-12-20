@@ -41,6 +41,9 @@
     <form action="/add_subscription">
         <button>Добавить</button>
     </form>
+    <form action="/audits">
+        <button>История изменений</button>
+    </form>
     <table>
         <thead>
             <tr>
@@ -60,7 +63,6 @@
                 <td>{{ subscription[3] }}</td>
                 <td>{{ subscription[4] }}</td>
                 <td>
-                    <!-- Кнопка удаления с передачей ID подписки -->
                     <button class="delete-btn" data-subscription-id="{{ subscription[0] }}">Удалить</button>
                 </td>
                 <td>
@@ -80,20 +82,16 @@
             
             deleteButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
-                    var subscriptionId = this.getAttribute('data-subscription-id');
-                    
-                    // Запрос подтверждения
+                    var subscriptionId = this.getAttribute('data-subscription-id');             
                     var confirmation = confirm("Вы действительно хотите удалить подписку?");
                     if (confirmation) {
-                        // Если подтверждено, удаляем подписку
                         deleteSubscription(subscriptionId);
                     }
                 });
             });
 
-            // Функция для удаления подписки
             function deleteSubscription(subscriptionId) {
-                window.location.href = '/delete_subscription/' + subscriptionId; // Перенаправляем на URL для удаления
+                window.location.href = '/delete_subscription/' + subscriptionId; 
             }
         });
     </script>

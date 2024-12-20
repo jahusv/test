@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход</title>
+    <title>Регистрация</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,30 +36,44 @@
     </style>
 </head>
 <body>
-    <h1>Вход</h1>
-    <form method="POST">  
-        <div class="modal">
-            <h2>Регистрация</h2>
-            {% if errors %}
-        <div class="error-container">
-            
-                {% for error in errors %}
-                    {{ error }}
-                {% endfor %}
-            
-        </div>
-            {% endif %} 
-            <label for="username">Логин
-                <input type="text" name="username" placeholder="username">
-            </label><br>
-            <label for="password">Пароль
-                <input type="text" name="password" placeholder="password">
-            </label><br>
-    
-            <button type="submit">Зарегистрироваться</button>
-            <button type="reset">Отмена</button>
-            
-        </div>
+    <h1>Регистрация</h1>
+    <form id="register-form">
+        <label for="username">Имя пользователя</label>
+        <input type="text" id="username" name="username" required>
+
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Зарегистрироваться</button>
     </form>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function (event) {
+            event.preventDefault(); // тмена стандартного действия
+    
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+    
+            // отправить 
+            const response = await fetch('/registration', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }), // ответ json
+            });
+    
+            // ожидание ответа от сервера
+            const result = await response.json();
+    
+            if (response.ok) {
+                alert(result.message);
+                window.location.href = '/';
+            } else {
+                alert(result.error); 
+            }
+        });
+    </script>
+    
 </body>
 </html>
