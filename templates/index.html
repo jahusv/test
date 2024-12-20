@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подписки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+
+    </style>
+</head>
+<body>
+    <h1>Подписки</h1>
+    <form action="/add_subscription">
+        <button>Добавить</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Стоимость</th>
+                <th>Периодичность оплаты (мес)</th>
+                <th>Дата начала подписки</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscriptions %}
+            <tr>
+                <td>{{ subscription[1] }}</td>
+                <td>{{ subscription[2] }}</td>
+                <td>{{ subscription[3] }}</td>
+                <td>{{ subscription[4] }}</td>
+                <td>
+                    <!-- Кнопка удаления с передачей ID подписки -->
+                    <button class="delete-btn" data-subscription-id="{{ subscription[0] }}">Удалить</button>
+                </td>
+                <td>
+                    <a href="{{ url_for('rgr.edit_subscription', subscription_id=subscription[0]) }}">
+                        <button class="edit-btn">Редактировать</button>
+                    </a>
+                    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var deleteButtons = document.querySelectorAll('.delete-btn');
+            
+            deleteButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var subscriptionId = this.getAttribute('data-subscription-id');
+                    
+                    // Запрос подтверждения
+                    var confirmation = confirm("Вы действительно хотите удалить подписку?");
+                    if (confirmation) {
+                        // Если подтверждено, удаляем подписку
+                        deleteSubscription(subscriptionId);
+                    }
+                });
+            });
+
+            // Функция для удаления подписки
+            function deleteSubscription(subscriptionId) {
+                window.location.href = '/delete_subscription/' + subscriptionId; // Перенаправляем на URL для удаления
+            }
+        });
+    </script>
+</body>
+</html>
